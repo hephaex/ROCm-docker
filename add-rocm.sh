@@ -51,14 +51,27 @@ if uname -r | grep -q 'rocm'; then
         add_repo http://repo.radeon.com/rocm/apt/debian/
     fi
 
-else
+elif [ -e /sys/module/amdkfd/version ]; then
+
     KERNEL_VERSION=$(cat /sys/module/amdkfd/version)
     KERNEL_SRC_VERSION=$(cat /sys/module/amdkfd/srcversion)
     if [ "$KERNEL_VERSION" == "2.0.0" ]; then
+        # 1.7.137
         if [ "$KERNEL_SRC_VERSION" == "13FF90CA7D6AC14290ADCFD" ] || [ "$KERNEL_SRC_VERSION" == "3A26446A606958428B1B870" ]; then
             download_repo http://repo.radeon.com/rocm/archive/apt_1.7.2.tar.bz2
-        # E657186569CAA8D3E3727BA - 1.8.2
-        # B9B5387F6B6FEA02D977638 - ??
+        # 1.8.118
+        elif [ "$KERNEL_SRC_VERSION" == "B9B5387F6B6FEA02D977638" ]; then
+            download_repo http://repo.radeon.com/rocm/archive/apt_1.8.0.tar.bz2
+        # 1.8-151 -> 1.8.1
+        # 1.8.192
+        elif [ "$KERNEL_SRC_VERSION" == "E657186569CAA8D3E3727BA" ]; then
+            download_repo http://repo.radeon.com/rocm/archive/apt_1.8.2.tar.bz2
+        # 1.9.211
+        elif [ "$KERNEL_SRC_VERSION" == "1C6A1C03695B2681E4F30E4" ]; then
+            download_repo http://repo.radeon.com/rocm/archive/apt_1.9.1.tar.bz2
+        # 1.9.307
+        elif [ "$KERNEL_SRC_VERSION" == "FFDB742B15AC9CA19B5EE64" ]; then
+            download_repo http://repo.radeon.com/rocm/archive/apt_1.9.2.tar.bz2
         else
             add_repo http://repo.radeon.com/rocm/apt/debian/
         fi
@@ -66,6 +79,8 @@ else
         add_repo http://repo.radeon.com/rocm/apt/debian/
     fi
 
+else
+    add_repo http://repo.radeon.com/rocm/apt/debian/
 fi
 
 # Install key
