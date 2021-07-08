@@ -10,14 +10,15 @@
 # If it is desired to run the container manually through the docker command-line, the following is an example
 # 'docker run -it --rm -v [host/directory]:[container/directory]:ro <user-name>/<project-name>'.
 
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Peng Sun <Peng.Sun@amd.com>
 
 # Initialize the image
 # Modify to pre-install dev tools and ROCm packages
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl && \
-  curl -sL http://repo.radeon.com/rocm/apt/debian/rocm.gpg.key | apt-key add - && \
-  sh -c 'echo deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list' && \
+ARG ROCM_VERSION=4.2
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl gnupg && \
+  curl -sL http://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
+  sh -c 'echo deb [arch=amd64] http://repo.radeon.com/rocm/apt/$ROCM_VERSION/ ubuntu main > /etc/apt/sources.list.d/rocm.list' && \
   apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   sudo \
   libelf1 \
@@ -26,6 +27,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
   git \
   vim-nox \
   cmake-curses-gui \
+  kmod \
+  file \
+  python3 \
+  python3-pip \
   rocm-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
@@ -37,7 +42,7 @@ COPY sudo-nopasswd /etc/sudoers.d/sudo-nopasswd
 # This is meant to be used as an interactive developer container
 # Create user rocm-user as member of sudo group
 # Append /opt/rocm/bin to the system PATH variable
-RUN useradd --create-home -G sudo --shell /bin/bash rocm-user
+RUN useradd --create-home -G sudo,video --shell /bin/bash rocm-user
 #    sed --in-place=.rocm-backup 's|^\(PATH=.*\)"$|\1:/opt/rocm/bin"|' /etc/environment
 
 USER rocm-user
